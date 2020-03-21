@@ -18,7 +18,7 @@ ecra_altura = 680
 janela = pygame.display.set_mode(
     (ecra_largura, ecra_altura)
 )
-pygame.display.set_caption('Japonês')
+pygame.display.set_caption('Corona Vírus: O Jogo')
 
 # Cores
 cor = {
@@ -27,24 +27,26 @@ cor = {
     'c': (64,249,255), # ciano　シアン
     'g': (66,255,66), # verde 緑
     'g': (248,210,16), # ouro 金色
-    'r': (245,23,32), # vermelho　赤
-    'bk': (30,70,130) # only for bk
+    'r': (245,23,32) # vermelho　赤
 }
 
 # Objetos do jogo
-fundo = pygame.image.load('data/fundo.jpg')
+fundo = pygame.image.load('tela.jpg')
 linha = pygame.Rect(0,621,600,20)
 
-fonte = pygame.font.SysFont('NSinSum', 80)
-palavra = fonte.render('enpitsu', False, cor['w'])
-pos_palavra = palavra.get_rect()
-pos_palavra.center = (138,40)
+fonte = pygame.font.SysFont('calibri', 80)
+titulo = fonte.render('Corona Vírus', False, cor['b'])
+pos_titulo = titulo.get_rect()
+pos_titulo.center = (300,125)
+fonte = pygame.font.SysFont('calibri', 30)
+stt = [fonte.render(c, False, cor['b']) for c in ('Para se livrar desse vírus,','pressione ESPAÇO quando','passar pela linha azul!', 'Pressione ESPAÇO para começar')]
 
-letras = []
-#letras = [
-#
-#]
+stt_size = [c.get_rect() for c in stt]
+size = ((298,264),(290,299), (300,333), (300,582))
+for c in range(len(stt)):
+    stt_size[c].center = size[c]
 
+titulo_on = True
 # loop
 while True:
     #pygame.time.delay(50)
@@ -55,13 +57,23 @@ while True:
             pygame.quit()
             exit()
 
+    comando = pygame.key.get_pressed()
+    if comando[pygame.K_SPACE]:
+        if titulo_on:
+            titulo_on = False
     # Desenhando na tela
-    janela.fill(cor['g'])
-    janela.blit(fundo,(0,95))
-    pygame.draw.rect(janela, (245,23,32), linha)
-    janela.blit(palavra,pos_palavra)
-    for c in range(len(letras)):
-        janela.blit(janela[c][])
+    # janela.fill(cor['g'])
+    janela.blit(fundo,(0,0))
+    pygame.draw.rect(janela, cor['c'], linha)
+    # janela.blit(palavra,pos_palavra)
+    # for c in range(len(letras)):
+    #     janela.blit(janela[c][])
+    if titulo_on:
+        janela.blit(titulo,pos_titulo)
+        for c in range(len(stt)):
+            janela.blit(stt[c],stt_size[c])
+    else:
+        pass
 
     # Atualizar a tela
     pygame.display.flip()
