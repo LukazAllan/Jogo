@@ -31,7 +31,9 @@ cor = {
 }
 
 # Objetos do jogo
-fundo = pygame.image.load('tela.jpg')
+fundo = pygame.image.load('data/tela.jpg')
+home = pygame.image.load('data/home_sketch.jpg')
+en = pygame.image.load('data/coronga_vairus.png')
 linha = pygame.Rect(0,621,600,20)
 
 fonte = pygame.font.SysFont('calibri', 80)
@@ -47,9 +49,17 @@ for c in range(len(stt)):
     stt_size[c].center = size[c]
 
 titulo_on = True
+enemies = []
+pos = (
+    [124, -76],
+    [256, -76],
+    [409, -76]
+)
+ciclo = 0
 # loop
 while True:
     #pygame.time.delay(50)
+    # print(ciclo)
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -61,19 +71,48 @@ while True:
     if comando[pygame.K_SPACE]:
         if titulo_on:
             titulo_on = False
+        else:
+            pass
+    if comando[pygame.K_UP]:
+        pos[1] -=  1
+    if comando[pygame.K_DOWN]:
+        pos[1] +=  1
+    if comando[pygame.K_LEFT]:
+        pos[0] -=  1
+    if comando[pygame.K_RIGHT]:
+        pos[0] +=  1
+    if comando[pygame.K_1]:
+        print(pos)
+    # [124, 2], [256, 2],[409, 543]
     # Desenhando na tela
-    # janela.fill(cor['g'])
-    janela.blit(fundo,(0,0))
-    pygame.draw.rect(janela, cor['c'], linha)
-    # janela.blit(palavra,pos_palavra)
-    # for c in range(len(letras)):
-    #     janela.blit(janela[c][])
     if titulo_on:
-        janela.blit(titulo,pos_titulo)
-        for c in range(len(stt)):
-            janela.blit(stt[c],stt_size[c])
+        # janela.blit(titulo,pos_titulo)
+        # for c in range(len(stt)):
+        #     janela.blit(stt[c],stt_size[c])
+        janela.blit(home,(0,0))
     else:
-        pass
+        ciclo += 1
+        if ciclo % 150 == 0:
+            enemies.append(rd(pos))
+        print(enemies)
+        timer = fonte.render(f'{ciclo//75}', False, cor['b'])
+        janela.blit(fundo,(0,0))
+        pygame.draw.rect(janela, cor['c'], linha)
+        janela.blit(timer, (0,0))
+        for c in enemies:
+            janela.blit(en,c)
+        # atualizando posições e deletando da tela
+        tirar=[]
+        for c in range(len(enemies)):
+            if enemies[c][1] > 690:
+                tirar.append(c)
+                print(c)
+            else:
+                enemies[c][1] += 1
+        if len(tirar) != 0:
+            for c in tirar:
+                enemies.pop(index=c)
+
 
     # Atualizar a tela
     pygame.display.flip()
