@@ -43,11 +43,15 @@ pos = (
     [256, -76],
     [409, -76]
 )
+cycl = 0
 ciclo = 0
 vel = 1 + ciclo//300
-vida = 3
+vida = 4
+cycl_1 = ['','','']
 # loop
 while True:
+
+    ciclo += 1
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -56,27 +60,35 @@ while True:
             exit()
 
     comando = pygame.key.get_pressed()
-    if comando[pygame.K_SPACE]:
+    if comando[pygame.K_SPACE] or comando[pygame.K_1]:
         if titulo_on:
             titulo_on = False
         else:
-            found_en = False
+            not_en = True
             for c in enemies:
                 if 621 < c[1] + 75 < 675:
-                    found_en = True
+                    not_en = False
+                    cycl = 0
                     enemies.remove(c)
                 else:
                     pass
-            if found_en == False:
-                vida -= 1
+            if not_en:
+                cycl += 1
+                cycl_1.append(cycl//30)
+                if cycl_1[1] != cycl_1[2]:
+                    vida -= 1
+                if len(cycl_1) > 2:
+                    del cycl_1[0]
+    else:
+        pass
+        # cycl = 0
 
     if titulo_on:
         janela.blit(home,(0,0))
     else:
-        ciclo += 1
         if ciclo % 150 == 0:
             enemies.append(pos[rd(0, len(pos)-1)].copy())
-        print(enemies)
+        print(cycl)
 
         # Desenhando na tela
         timer = fonte.render(f'{ciclo//75}', False, cor['b'])
