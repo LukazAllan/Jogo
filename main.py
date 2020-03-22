@@ -1,16 +1,24 @@
 # Author: Allan Lucas
-#
+# Python 3.8
 
 import pygame
 from sys import exit
-from json import load
 from random import randint as rd
+import logging
 
-# Carregando Dados
-with open('data/data.json', 'r', encoding='utf-8') as raw:
-    data = load(raw)
+# Criando e configurando logger
+logging.basicConfig(
+    filename = 'main.log',
+    level = logging.DEBUG,
+    format = "%(asctime)s %(levelname)s - %(message)s",
+    filemode = 'w'
+)
+logger = logging.getLogger()
+logger.debug('Logging on.')
+
 
 # Preparando a Janela
+logger.debug('pygame init')
 pygame.init() #inicia o pygame
 clock = pygame.time.Clock()
 ecra_largura = 600
@@ -21,6 +29,7 @@ janela = pygame.display.set_mode(
 pygame.display.set_caption('Corona Vírus: O Jogo')
 
 # Cores
+logger.debug('cores')
 cor = {
     'b': (0,0,0),# preto　黒
     'w': (255,255,255), # branco　白
@@ -31,12 +40,15 @@ cor = {
 }
 
 # Objetos do jogo
+logger.debug('Objetos do jogo')
 fundo = pygame.image.load('data/tela.jpg')
 home = pygame.image.load('data/home_sketch.jpg')
 en = pygame.image.load('data/coronga_vairus.png')
+music = pygame.mixer.music.load('data/audio.ogg')
+musica_on = False
 linha = pygame.Rect(0,621,600,20)
 fonte = pygame.font.SysFont('calibri', 30)
-titulo_on = True
+screen = 'tela'
 enemies = []
 pos = (
     [124, -76],
@@ -45,24 +57,28 @@ pos = (
 )
 cycl = 0
 ciclo = 0
-vel = 1 + ciclo//300
+vel = (1 + ciclo//300)/ 2
 vida = 4
 cycl_1 = ['','','']
 # loop
+logger.debug('Inicia o loop')
 while True:
 
     ciclo += 1
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            print("Quit here!")
+            logger.debug('Clicou no X\nexit')
+            #print("Quit here!")
             pygame.quit()
             exit()
 
+    # keyboard binding
     comando = pygame.key.get_pressed()
     if comando[pygame.K_SPACE] or comando[pygame.K_1]:
-        if titulo_on:
-            titulo_on = False
+        logger.debug('Espaço')
+        if screen == 'tela':
+            screen = 'jogo'
         else:
             not_en = True
             for c in enemies:
@@ -79,20 +95,30 @@ while True:
                     vida -= 1
                 if len(cycl_1) > 2:
                     del cycl_1[0]
-    else:
-        pass
-        # cycl = 0
+    if comando[pygame.K_ESCAPE]:
+        if screen == 'pausa':
+            screen == 'jogo'
+        elif screen == 'jogo':
+            screen == 'pausa'
+        else:
+            pass
 
-    if titulo_on:
+    if screen == 'tela':
         janela.blit(home,(0,0))
-    else:
+        logger.debug('Home')
+    elif screen == 'jogo':
+        if not musica_on:
+            pygame.mixer.music.play(-1)
+            musica_on = True
+        logger.debug('Jogando')
         if ciclo % 150 == 0:
             enemies.append(pos[rd(0, len(pos)-1)].copy())
+            logger.info('Carregando inimigo na tela.')
         print(cycl)
 
         # Desenhando na tela
-        timer = fonte.render(f'{ciclo//75}', False, cor['b'])
-        hp = fonte.render(f'{vida}', False, cor['b'])
+        timer = fonte.render(f'Tempo: {ciclo//75}', False, cor['b'])
+        hp = fonte.render(f'HP: {vida}', False, cor['b'])
         janela.blit(fundo,(0,0))
         pygame.draw.rect(janela, cor['c'], linha)
         janela.blit(timer, (0, 0))
@@ -112,8 +138,28 @@ while True:
         for c in tirar:
             enemies.remove(c)
             vida -= 1
-
+        if vida <= 0:
+            break
+        logger.debug(f'''Variaveis:
+enemies = {enemies}
+cycl = {cycl}
+ciclo = {ciclo}
+Tempo = {ciclo//75}
+vel = {vel}
+vida = {vida}
+cycl_1 = {cycl_1}
+''')
+    else:
+        pass
 
     # Atualizar a tela
     pygame.display.flip()
     clock.tick()
+logger.debug(f'''Variaveis:
+enemies = {enemies}
+cycl = {cycl}
+ciclo = {ciclo}
+vel = {vel}
+vida = {vida}
+cycl_1 = {cycl_1}
+''')

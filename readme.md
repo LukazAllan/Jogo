@@ -7,6 +7,7 @@ Intel Core i3-2100
 
 GPU Integrada Gráficos HD Intel® 2000
 
-Python 3.8
+#  Dependências
+Python 3.8, pygame 1.9.6
 
 Para jogar, execute o main.py
