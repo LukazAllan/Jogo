@@ -57,14 +57,16 @@ pos = (
 )
 cycl = 0
 ciclo = 0
-vel = (1 + ciclo//300)/ 2
+vel = (1 + ciclo//300)/ 4
 vida = 4
 cycl_1 = ['','','']
+
 # loop
 logger.debug('Inicia o loop')
 while True:
 
     ciclo += 1
+    tempo_t = 150 - ciclo//250
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -111,10 +113,11 @@ while True:
             pygame.mixer.music.play(-1)
             musica_on = True
         logger.debug('Jogando')
-        if ciclo % 150 == 0:
-            enemies.append(pos[rd(0, len(pos)-1)].copy())
+        if ciclo % tempo_t == 0:
+            for c in range(1+(ciclo//4000)):
+                enemies.append(pos[rd(0, len(pos)-1)].copy())
             logger.info('Carregando inimigo na tela.')
-        print(cycl)
+        print(tempo_t)
 
         # Desenhando na tela
         timer = fonte.render(f'Tempo: {ciclo//75}', False, cor['b'])
