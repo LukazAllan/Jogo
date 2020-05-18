@@ -2,7 +2,8 @@
 # Python 3.8
 '''
 <SETUP>
-:param logger: se encarrega de fazer o trackeamento de erros no jogo
+:param logger: se encarrega de fazer o trackeamento de erros no jogo;
+:param log: True logger ativo; False logger desativado
 :param clock: se encarrega de brecar o jogo a um certo framerate
 :param fps: frames por segundo, framerate*
 :param ecra_largura: largura da janela
@@ -27,33 +28,36 @@
 :param pausa: Para False: JOGANDO; Para True: PAUSADO;
 <LOOP>
 :param comando: Se encarrega de buscar as teclas que estão sendo pressionadas
-:param :
-:param :
-:param :
-
 '''
+from logging import Logger
+
 import pygame
+from pygame import mixer as mix
 from sys import exit
 from random import randint as rd
 import logging
 from math import trunc
 
-# Criando e configurando #logger
+# Criando e configurando logger
 logging.basicConfig(
-    filename = 'main.log',
-    level = logging.DEBUG,
-    format = "%(asctime)s %(levelname)s - %(message)s",
-    filemode = 'w'
+    filename='main.log',
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s - %(message)s",
+    filemode='w'
 )
-#logger = logging.getLogger()
-#logger.debug('Logging on.')
+log = False  # sem acompanhamento de erros
 
+if log:
+    logger: Logger = logging.getLogger()
+if log:
+    logger.debug('Logging on.')
 
 # Preparando a Janela
-#logger.debug('pygame init')
-pygame.init() #inicia o pygame
+if log:
+    logger.debug('pygame init')
+pygame.init()  # inicia o pygame
 clock = pygame.time.Clock()
-fps = 50 #framerate
+fps = 50  # framerate
 ecra_largura = 600
 ecra_altura = 680
 janela = pygame.display.set_mode(
@@ -62,24 +66,26 @@ janela = pygame.display.set_mode(
 pygame.display.set_caption('Corona Vírus: O Jogo')
 
 # Cores
-#logger.debug('cores')
+if log:
+    logger.debug('cores')
 cor = {
-    'b': (0,0,0),# preto　黒
-    'w': (255,255,255), # branco　白
-    'c': (64,249,255), # ciano　シアン
-    'g': (66,255,66), # verde 緑
-    'g': (248,210,16), # ouro 金色
-    'r': (245,23,32) # vermelho　赤
+    'b': (0, 0, 0),  # preto　黒
+    'w': (255, 255, 255),  # branco　白
+    'c': (64, 249, 255),  # ciano　シアン
+    'g': (66, 255, 66),  # verde 緑
+    'go': (248, 210, 16),  # ouro 金色
+    'r': (245, 23, 32)  # vermelho　赤
 }
 
 # Objetos do jogo
-#logger.debug('Objetos do jogo')
+if log:
+    logger.debug('Objetos do jogo')
 fundo = pygame.image.load('data/tela.jpg')
-home = pygame.image.load('data/home_sketch.jpg')
+home = pygame.image.load('data/home.jpg')
 en = pygame.image.load('data/coronga_vairus.png')
-music = pygame.mixer.music.load('data/audio.ogg')
+mix.music.load('data/audio.ogg')
 musica_on = False
-linha = pygame.Rect(0,621,600,20)
+linha = pygame.Rect(0, 621, 600, 20)
 fonte = pygame.font.SysFont('calibri', 30)
 screen = 'tela'
 enemies = []
@@ -90,30 +96,37 @@ pos = (
     [409, -76]
 )
 cycl = 0
-ciclo = 0 # ciclos dentro do loop
-vel = 0.75 + ciclo/5000
+ciclo = 0  # ciclos dentro do loop
+vel = 1 + ciclo / 50
 vida = 4
-cycl_1 = ['','','']
-pausa =  False
+cycl_1 = ['', '', '']
+pausa = False
 
 # loop
-#logger.debug('Inicia o loop')
+if log:
+    logger.debug('Inicia o loop')
 while True:
+    vel = 1 + ciclo / 1000
+    print(vel)
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            #logger.debug('Clicou no X\nexit')
-            #print("Quit here!")
+            if log:
+                logger.debug('Clicou no X\nexit')
             pygame.quit()
             exit()
 
     # keyboard binding
     comando = pygame.key.get_pressed()
+    if comando[pygame.K_ESCAPE] and screen == 'tela':
+        pygame.quit()
+        exit()
+
     if comando[pygame.K_SPACE] or comando[pygame.K_1]:
         if pausa:
-            pausa == False
+            pausa = False
         elif not pausa:
-            pausa == True
+            pausa = True
         else:
             pass
 
@@ -123,7 +136,7 @@ while True:
         else:
             not_en = True
             for c in enemies:
-                if c[0] == 125 and 621 < c[1] + 75 < 675:
+                if c[0] == 125 and 621 < c[1] + 75 < 675 or 621 < c[1] < 675:
                     not_en = False
                     cycl = 0
                     enemies.remove(c)
@@ -131,7 +144,7 @@ while True:
                     pass
             if not_en:
                 cycl += 1
-                cycl_1.append(cycl//30)
+                cycl_1.append(cycl // 30)
                 if cycl_1[1] != cycl_1[2]:
                     vida -= 1
                 if len(cycl_1) > 2:
@@ -143,7 +156,7 @@ while True:
         else:
             not_en = True
             for c in enemies:
-                if c[0] == 267 and 621 < c[1] + 75 < 675:
+                if c[0] == 267 and 621 < c[1] + 75 < 675 or 621 < c[1] < 675:
                     not_en = False
                     cycl = 0
                     enemies.remove(c)
@@ -151,7 +164,7 @@ while True:
                     pass
             if not_en:
                 cycl += 1
-                cycl_1.append(cycl//30)
+                cycl_1.append(cycl // 30)
                 if cycl_1[1] != cycl_1[2]:
                     vida -= 1
                 if len(cycl_1) > 2:
@@ -163,7 +176,7 @@ while True:
         else:
             not_en = True
             for c in enemies:
-                if c[0] == 409 and 621 < c[1] + 75 < 675:
+                if c[0] == 409 and 621 < c[1] + 75 < 675 or 621 < c[1] < 675:
                     not_en = False
                     cycl = 0
                     enemies.remove(c)
@@ -171,26 +184,31 @@ while True:
                     pass
             if not_en:
                 cycl += 1
-                cycl_1.append(cycl//30)
+                cycl_1.append(cycl // 30)
                 if cycl_1[1] != cycl_1[2]:
                     vida -= 1
                 if len(cycl_1) > 2:
                     del cycl_1[0]
 
     if screen == 'tela':
-        janela.blit(home,(0,0))
-        #logger.debug('Home')
+        janela.blit(home, (0, 0))
+        if log:
+            logger.debug('Home')
     elif screen == 'jogo':
+        if vida <= 0:
+            pass
         ciclo += 1
         # tempo_t = 150 - ciclo//250
         if not musica_on:
-            pygame.mixer.music.play(-1)
+            mix.music.play(-1)
             musica_on = True
-        #logger.debug('Jogando')
-        if ciclo % 300 == 0 or ciclo == 1:
-            for c in range(rd(1,3)):
-                enemies.append(pos[rd(0, len(pos)-1)].copy())
-            #logger.info('Carregando inimigo na tela.')
+        if log:
+            logger.debug('Jogando')
+        if ciclo % int(300 / vel) == 0 or ciclo == 1:
+            if log:
+                logger.info('Carregando inimigo na tela.')
+            for c in range(rd(1, 3)):
+                enemies.append(pos[rd(0, len(pos) - 1)].copy())
 
         # Checando sobreposições
         # for c in xrange(1,10):
@@ -198,17 +216,17 @@ while True:
         # print(ciclo)
 
         # Desenhando na tela
-        timer = fonte.render(f'Tempo: {ciclo//50}', False, cor['b'])
+        timer = fonte.render(f'Tempo: {ciclo // 50}', False, cor['b'])
         hp = fonte.render(f'HP: {vida}', False, cor['b'])
-        janela.blit(fundo,(0,0))
+        janela.blit(fundo, (0, 0))
         pygame.draw.rect(janela, cor['c'], linha)
         janela.blit(timer, (0, 0))
         janela.blit(hp, (0, 30))
         for c in enemies:
-            janela.blit(en,c)
+            janela.blit(en, c)
 
         # atualizando posições e deletando da tela
-        tirar=[]
+        tirar = []
         for c in range(len(enemies)):
             if enemies[c][1] > 690:
                 tirar.append(enemies[c])
@@ -228,7 +246,9 @@ while True:
         pass
 
     # Atualizar a tela
-    print(len(enemies))
+
     pygame.display.flip()
     clock.tick(fps)
-#logger.debug(f'''Variaveis:\nenemies = {enemies}\ncycl = {cycl}\nciclo = {ciclo}\nvel = {vel}\nvida = {vida}\ncycl_1 = {cycl_1}''')
+if log:
+    logger.debug(
+        f'''Variaveis:\nenemies = {enemies}\ncycl = {cycl}\nciclo = {ciclo}\nvel = {vel}\nvida = {vida}\ncycl_1 = {cycl_1}''')
