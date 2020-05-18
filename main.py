@@ -17,17 +17,16 @@
 :param musica_on: para True: musica tocando; Para False: musica ainda nao tocada
 :param linha: guarda o pygame.Rect() da linha para transformar em objeto
 :param fonte: *auto-explicativo
-:param screen: Para 'tela': tela inicial; Para 'jogo': tela do jogo;
+:param screen: Para 'tela': tela inicial; Para 'jogo': tela do jogo; Para 'pause': Pausa o jogo em andamento
 :param enemies: lista com os viruzinhos na tela
 :param pos: posicoes pré-definidas dos viruzinhos
-:param cycl: undefined
-:param ciclo: inteiro que diz quantasvezes o loop foi feito
+:param cycl: registra o tempo
+:param ciclo: inteiro que diz quantas vezes o loop foi feito
 :param vel: velocidade em função de ciclo, (1 + ciclo//300)/ 4
 :param vida: *auto-explicativo
 :param cycl_1: lista que guarda os três últimos estados de undefined
-:param pausa: Para False: JOGANDO; Para True: PAUSADO;
 <LOOP>
-:param comando: Se encarrega de buscar as teclas que estão sendo pressionadas
+:param comando: Se encarrega de buscar as teclas e retorna True quando pressionadas
 '''
 from logging import Logger
 
@@ -82,32 +81,45 @@ if log:
     logger.debug('Objetos do jogo')
 fundo = pygame.image.load('data/tela.jpg')
 home = pygame.image.load('data/home.jpg')
+pause = pygame.image.load('data/pause.png')
+fim = pygame.image.load('data/fim.jpg')
 en = pygame.image.load('data/coronga_vairus.png')
 mix.music.load('data/audio.ogg')
 musica_on = False
 linha = pygame.Rect(0, 621, 600, 20)
 fonte = pygame.font.SysFont('calibri', 30)
 screen = 'tela'
-enemies = []
 pos = (
     [125, -76],
     # [256, -76],
     [267, -76],
     [409, -76]
 )
+enemies = []
 cycl = 0
 ciclo = 0  # ciclos dentro do loop
 vel = 1 + ciclo / 50
-vida = 4
-cycl_1 = ['', '', '']
-pausa = False
-
+vida = 5
+cycl_1 = [0, 0, 0]
+def draw(comeco = True):
+    if comeco:
+        timer = fonte.render(f'Tempo: {ciclo // 50}s', False, cor['b'])
+        hp = fonte.render(f'HP: {vida}', False, cor['b'])
+        janela.blit(fundo, (0, 0))
+        pygame.draw.rect(janela, cor['c'], linha)
+        janela.blit(timer, (0, 0))
+        janela.blit(hp, (0, 30))
+        for c in enemies:
+            janela.blit(en, c)
+    else:
+        janela.blit(fim, (0,0))
+        janela.blit(fonte.render(f'Tempo: {ciclo // 50}s', False, cor['b']), (230, 450))
 # loop
 if log:
     logger.debug('Inicia o loop')
 while True:
     vel = 1 + ciclo / 1000
-    print(vel)
+    print(cycl, cycl_1)
     # input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -122,16 +134,25 @@ while True:
         pygame.quit()
         exit()
 
+    if comando[pygame.K_q] and screen == 'fim':
+        screen = 'jogo'
+        enemies = []
+        cycl = 0
+        ciclo = 0  # ciclos dentro do loop
+        vel = 1 + ciclo / 50
+        vida = 4
+        cycl_1 = [0, 0, 0]
+
     if comando[pygame.K_SPACE] or comando[pygame.K_1]:
-        if pausa:
-            pausa = False
-        elif not pausa:
-            pausa = True
-        else:
+        if screen == 'tela':
             pass
+        else:
+            screen = 'pausa'
 
     if comando[pygame.K_a]:
         if screen == 'tela':
+            screen = 'jogo'
+        elif screen == 'pausa':
             screen = 'jogo'
         else:
             not_en = True
@@ -152,6 +173,8 @@ while True:
 
     if comando[pygame.K_s]:
         if screen == 'tela':
+            screen = 'jogo'
+        elif screen == 'pausa':
             screen = 'jogo'
         else:
             not_en = True
@@ -215,22 +238,13 @@ while True:
         #     pass
         # print(ciclo)
 
-        # Desenhando na tela
-        timer = fonte.render(f'Tempo: {ciclo // 50}', False, cor['b'])
-        hp = fonte.render(f'HP: {vida}', False, cor['b'])
-        janela.blit(fundo, (0, 0))
-        pygame.draw.rect(janela, cor['c'], linha)
-        janela.blit(timer, (0, 0))
-        janela.blit(hp, (0, 30))
-        for c in enemies:
-            janela.blit(en, c)
 
         # atualizando posições e deletando da tela
         tirar = []
         for c in range(len(enemies)):
             if enemies[c][1] > 690:
                 tirar.append(enemies[c])
-                print(c)
+                # print(c)
             else:
                 enemies[c][1] += vel
         tirar.sort(reverse=True)
@@ -238,12 +252,18 @@ while True:
             enemies.remove(c)
             vida -= 1
         if vida <= 0:
-            pass
+            screen = 'fim'
+        # Desenhando na tela
+        draw()
+    elif screen == 'pausa':
+        draw()
+        janela.blit(pause, (0, 0))
+
 
         # input()
         # print(f'''Variaveis:\nenemies = {enemies}\ncycl = {cycl}\nciclo = {ciclo}\nTempo = {ciclo//75}\nvel = {vel}\nvida = {vida}\ncycl_1 = {cycl_1}\n''')
-    else:
-        pass
+    elif screen == 'fim':
+        draw(False)
 
     # Atualizar a tela
 
