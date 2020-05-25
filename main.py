@@ -27,6 +27,7 @@
 :param cycl_1: lista que guarda os três últimos estados de undefined
 <LOOP>
 :param comando: Se encarrega de buscar as teclas e retorna True quando pressionadas
+:param tirar: Se encarrega de guardar informação dos vírus para tirar da tela
 '''
 from logging import Logger
 
@@ -91,7 +92,6 @@ fonte = pygame.font.SysFont('calibri', 30)
 screen = 'tela'
 pos = (
     [125, -76],
-    # [256, -76],
     [267, -76],
     [409, -76]
 )
@@ -101,7 +101,7 @@ ciclo = 0  # ciclos dentro do loop
 vel = 1 + ciclo / 50
 vida = 5
 cycl_1 = [0, 0, 0]
-def draw(comeco = True):
+def draw(comeco = True, vida=0):
     if comeco:
         timer = fonte.render(f'Tempo: {ciclo // 50}s', False, cor['b'])
         hp = fonte.render(f'HP: {vida}', False, cor['b'])
@@ -221,7 +221,6 @@ while True:
         if vida <= 0:
             pass
         ciclo += 1
-        # tempo_t = 150 - ciclo//250
         if not musica_on:
             mix.music.play(-1)
             musica_on = True
@@ -232,12 +231,6 @@ while True:
                 logger.info('Carregando inimigo na tela.')
             for c in range(rd(1, 3)):
                 enemies.append(pos[rd(0, len(pos) - 1)].copy())
-
-        # Checando sobreposições
-        # for c in xrange(1,10):
-        #     pass
-        # print(ciclo)
-
 
         # atualizando posições e deletando da tela
         tirar = []
@@ -254,14 +247,12 @@ while True:
         if vida <= 0:
             screen = 'fim'
         # Desenhando na tela
-        draw()
+        draw(vida=vida)
     elif screen == 'pausa':
         draw()
         janela.blit(pause, (0, 0))
 
 
-        # input()
-        # print(f'''Variaveis:\nenemies = {enemies}\ncycl = {cycl}\nciclo = {ciclo}\nTempo = {ciclo//75}\nvel = {vel}\nvida = {vida}\ncycl_1 = {cycl_1}\n''')
     elif screen == 'fim':
         draw(False)
 
